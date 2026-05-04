@@ -1,0 +1,266 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* Tailwind utility tokens (used for bg-accent, font-heading, etc.) */
+@theme {
+  --color-accent: #004cda;
+  --color-accent-soft: #a7c6ff;
+  --color-bg-light: #ffffff;
+  --color-bg-dark: #111111;
+
+  --font-heading: 'Merriweather', Georgia, 'Times New Roman', serif;
+  --font-body: 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+/* ----------------------------------------------------------------
+   Semantic tokens. Swap by theme. Use these in components.
+   ---------------------------------------------------------------- */
+:root {
+  --page-bg: #ffffff;
+  --page-fg: #111111;
+  --page-fg-muted: rgba(17, 17, 17, 0.6);
+
+  --hex-fill: #ffffff;
+  --hex-outline-stroke: #9a9a9a;
+  --tri-stroke: #d9d9d9;
+
+  --given-text: #111111;
+  --entry-text: #004cda;
+
+  --selected-fill: #a7c6ff;
+  --selected-text: #004cda;
+  --conflict-fill: #fde0e0;
+  --conflict-text: #b91c1c;
+
+  --numpad-fill: #ffffff;
+  --numpad-stroke: #9a9a9a;
+  --numpad-text: #111111;
+  --numpad-hover: #f0f0f0;
+
+  --hover-soft: rgba(0, 0, 0, 0.06);
+  --shadow-soft: 0 6px 18px rgba(0, 0, 0, 0.18);
+}
+
+[data-theme='dark'] {
+  --page-bg: #111111;
+  --page-fg: #ffffff;
+  --page-fg-muted: rgba(255, 255, 255, 0.6);
+
+  --hex-fill: #1c1c1c;
+  --hex-outline-stroke: #6a6a6a;
+  --tri-stroke: #3a3a3a;
+
+  --given-text: #ffffff;
+  --entry-text: #a7c6ff;
+
+  --selected-fill: #a7c6ff;
+  --selected-text: #111111;
+  --conflict-fill: #4a1c1c;
+  --conflict-text: #ff8a8a;
+
+  --numpad-fill: #2a2a2a;
+  --numpad-stroke: #6a6a6a;
+  --numpad-text: #ffffff;
+  --numpad-hover: #3a3a3a;
+
+  --hover-soft: rgba(255, 255, 255, 0.08);
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  font-family: var(--font-body);
+  background: var(--page-bg);
+  color: var(--page-fg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* ----------------------------------------------------------------
+   Board (global so polygon styles aren't subject to Svelte scoping)
+   ---------------------------------------------------------------- */
+.board {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+}
+
+.tri {
+  fill: var(--hex-fill);
+  stroke: var(--tri-stroke);
+  stroke-width: 0.6;
+  cursor: pointer;
+  transition: fill 80ms ease;
+  outline: none;
+}
+.tri:focus,
+.tri:focus-visible {
+  outline: none;
+}
+.tri.conflict {
+  fill: var(--conflict-fill);
+}
+.tri.selected,
+.tri.selected.conflict {
+  fill: var(--selected-fill);
+}
+
+.tri-text {
+  font-family: var(--font-body);
+  font-size: 18px;
+  font-weight: 600;
+  fill: var(--entry-text);
+  pointer-events: none;
+  user-select: none;
+}
+.tri-text.given {
+  fill: var(--given-text);
+  font-weight: 700;
+}
+.tri-text.conflict {
+  fill: var(--conflict-text);
+}
+.tri-text.selected {
+  fill: var(--selected-text);
+}
+
+.hex-outline {
+  fill: none;
+  stroke: var(--hex-outline-stroke);
+  stroke-width: 1.5;
+  pointer-events: none;
+}
+
+/* ----------------------------------------------------------------
+   Numpad
+   ---------------------------------------------------------------- */
+.numpad-svg {
+  display: block;
+  width: 100%;
+  max-width: 280px;
+  height: auto;
+  margin: 0 auto;
+}
+
+.numpad-btn {
+  cursor: pointer;
+  outline: none;
+}
+.numpad-btn:focus {
+  outline: none;
+}
+
+.numpad-hex {
+  fill: var(--numpad-fill);
+  stroke: var(--numpad-stroke);
+  stroke-width: 1.5;
+  transition: fill 120ms ease;
+}
+.numpad-btn:hover .numpad-hex {
+  fill: var(--numpad-hover);
+}
+.numpad-btn.active .numpad-hex {
+  fill: var(--selected-fill);
+}
+.numpad-btn:focus-visible .numpad-hex {
+  stroke: var(--color-accent);
+  stroke-width: 2.5;
+}
+
+.numpad-label {
+  font-family: var(--font-body);
+  font-size: 18px;
+  font-weight: 600;
+  fill: var(--numpad-text);
+  pointer-events: none;
+  user-select: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tri,
+  .numpad-hex {
+    transition: none;
+  }
+}
+
+/* ----------------------------------------------------------------
+   Shared buttons (used by modals, error cards, etc.)
+   ---------------------------------------------------------------- */
+.btn-primary,
+.btn-ghost {
+  border: 0;
+  border-radius: 999px;
+  padding: 10px 22px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  font-size: 14px;
+  cursor: pointer;
+  transition:
+    transform 120ms ease,
+    background-color 120ms ease;
+}
+.btn-primary {
+  background: var(--color-accent);
+  color: #ffffff;
+}
+.btn-primary:hover {
+  background: #003fb0;
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--page-fg);
+  border: 1px solid var(--hex-outline-stroke);
+}
+.btn-ghost:hover {
+  background: var(--hover-soft);
+}
+.btn-primary:active,
+.btn-ghost:active {
+  transform: scale(0.97);
+}
+.btn-primary:focus-visible,
+.btn-ghost:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn-primary,
+  .btn-ghost {
+    transition: none;
+  }
+  .btn-primary:active,
+  .btn-ghost:active {
+    transform: none;
+  }
+}
+
+/* ----------------------------------------------------------------
+   Landing decorative hex cluster
+   ---------------------------------------------------------------- */
+.cluster-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.12));
+}
+.cluster-hex-fill {
+  fill: #ffffff;
+  stroke: #9a9a9a;
+  stroke-width: 1.5;
+}
+.cluster-tri-line {
+  stroke: #d9d9d9;
+  stroke-width: 0.75;
+}
+.cluster-num {
+  fill: #111111;
+  font-family: var(--font-body);
+  font-size: 22px;
+  font-weight: 500;
+  text-anchor: middle;
+  dominant-baseline: middle;
+}

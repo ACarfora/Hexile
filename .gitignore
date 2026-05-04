@@ -1,0 +1,14 @@
+node_modules
+/build
+/.svelte-kit
+/package
+.env
+.env.*
+!.env.example
+.vercel
+.netlify
+.cloudflare
+*.log
+.claude/settings.local.json
+.DS_Store
+Thumbs.db
