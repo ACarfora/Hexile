@@ -149,6 +149,12 @@
     padding: 14px 20px 6px;
     column-gap: 12px;
   }
+
+  @media (max-width: 480px) {
+    header {
+      padding: 8px 16px 4px;
+    }
+  }
   .left {
     display: flex;
     align-items: center;

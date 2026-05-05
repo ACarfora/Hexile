@@ -203,6 +203,15 @@
     padding: 8px 16px 24px;
   }
 
+  @media (max-width: 480px) {
+    .board-area {
+      padding: 4px 16px;
+    }
+    .numpad-area {
+      padding: 4px 16px 12px;
+    }
+  }
+
   .error-card {
     text-align: center;
     font-family: var(--font-body);

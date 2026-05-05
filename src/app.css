@@ -146,6 +146,12 @@ body {
   margin: 0 auto;
 }
 
+@media (max-width: 480px) {
+  .numpad-svg {
+    max-width: 200px;
+  }
+}
+
 .numpad-btn {
   cursor: pointer;
   outline: none;
