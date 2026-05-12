@@ -191,15 +191,12 @@
 
       <button
         type="button"
-        class="iconbtn"
+        class="textbtn"
         aria-label="Undo last move"
         disabled={!canUndo}
         onclick={doUndo}
       >
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M12 4 A8 8 0 1 1 4 12" />
-          <polyline points="7.5 8.5 4 12 7.5 15.5" />
-        </svg>
+        Undo
       </button>
     </footer>
   {/if}
@@ -297,6 +294,36 @@
     stroke-width: 2;
     stroke-linecap: round;
     stroke-linejoin: round;
+  }
+
+  .textbtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 52px;
+    padding: 0 14px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--page-fg);
+    font-family: var(--font-body);
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      background-color 120ms ease,
+      opacity 120ms ease;
+  }
+  .textbtn:hover:not(:disabled) {
+    background: var(--hover-soft);
+  }
+  .textbtn:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+  .textbtn:disabled {
+    opacity: 0.3;
+    cursor: default;
   }
 
   @media (max-width: 480px) {
