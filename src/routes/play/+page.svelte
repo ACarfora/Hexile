@@ -67,6 +67,27 @@
     }
   }
 
+  const canHint = $derived.by(() => {
+    if (!game.state || timer.paused || loading || solvedOpen) return false;
+    return game.selectedHex !== null && game.selectedTri !== null;
+  });
+  const canUndo = $derived.by(() => {
+    if (!game.state || timer.paused || loading || solvedOpen) return false;
+    return game.state.history.length > 0;
+  });
+
+  function doHint() {
+    if (!canHint) return;
+    timer.begin();
+    game.hint();
+  }
+
+  function doUndo() {
+    if (!canUndo) return;
+    timer.begin();
+    game.undo();
+  }
+
   $effect(() => {
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
@@ -150,7 +171,36 @@
       <Board />
     </main>
     <footer class="numpad-area">
-      <Numpad />
+      <button
+        type="button"
+        class="iconbtn"
+        aria-label="Reveal answer for selected cell"
+        disabled={!canHint}
+        onclick={doHint}
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M9 18h6" />
+          <path d="M10 21h4" />
+          <path d="M12 3a6 6 0 0 0-4 10.5V16h8v-2.5A6 6 0 0 0 12 3z" />
+        </svg>
+      </button>
+
+      <div class="numpad-wrap">
+        <Numpad />
+      </div>
+
+      <button
+        type="button"
+        class="iconbtn"
+        aria-label="Undo last move"
+        disabled={!canUndo}
+        onclick={doUndo}
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <polyline points="3 7 3 13 9 13" />
+          <path d="M3.5 13a9 9 0 1 0 2.6-7.5" />
+        </svg>
+      </button>
     </footer>
   {/if}
 </div>
@@ -200,7 +250,53 @@
   }
   .numpad-area {
     flex: 0 0 auto;
-    padding: 8px 16px 24px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    column-gap: 8px;
+    padding: 8px 20px 24px;
+  }
+  .numpad-wrap {
+    min-width: 0;
+    display: flex;
+    justify-content: center;
+  }
+
+  .iconbtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--page-fg);
+    cursor: pointer;
+    transition:
+      background-color 120ms ease,
+      opacity 120ms ease;
+  }
+  .iconbtn:hover:not(:disabled) {
+    background: var(--hover-soft);
+  }
+  .iconbtn:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+  .iconbtn:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+  .iconbtn svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
 
   @media (max-width: 480px) {

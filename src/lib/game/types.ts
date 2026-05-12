@@ -17,5 +17,14 @@ export interface Puzzle {
 export interface GameState {
   puzzle: Puzzle;
   entries: Board;
+  hints: Board;
+  history: Move[];
   startedAt: number;
+}
+
+/** A single undoable change to `entries`. `prev` is the value before the change (undefined = empty). */
+export interface Move {
+  hex: number;
+  tri: number;
+  prev: number | undefined;
 }

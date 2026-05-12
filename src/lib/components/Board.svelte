@@ -1,7 +1,7 @@
 <script lang="ts">
   import { HEXES, HEX_VERTICES, BOARD_BOUNDS, cellKey } from '$lib/game/layout';
   import { findConflicts } from '$lib/game/validate';
-  import { isGiven, getValue } from '$lib/game/state';
+  import { isLocked, getValue } from '$lib/game/state';
   import { game } from '$lib/stores/game.svelte';
   import { timer } from '$lib/stores/timer.svelte';
 
@@ -37,7 +37,7 @@
     if (timer.paused) return;
     if (!game.state) return;
     timer.begin();
-    if (isGiven(game.state, hex, tri)) {
+    if (isLocked(game.state, hex, tri)) {
       game.clearSelection();
       return;
     }
@@ -58,7 +58,7 @@
       {#each TRI_INDICES as tri (tri)}
         {@const key = cellKey(hex.id, tri)}
         {@const value = game.state ? getValue(game.state, hex.id, tri) : undefined}
-        {@const given = game.state ? isGiven(game.state, hex.id, tri) : false}
+        {@const given = game.state ? isLocked(game.state, hex.id, tri) : false}
         {@const selected = game.selectedHex === hex.id && game.selectedTri === tri}
         {@const conflict = conflicts.has(key)}
         {@const pos = textPos(tri)}
