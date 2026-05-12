@@ -197,8 +197,8 @@
         onclick={doUndo}
       >
         <svg viewBox="0 0 24 24" aria-hidden="true">
-          <polyline points="3 7 3 13 9 13" />
-          <path d="M3.5 13a9 9 0 1 0 2.6-7.5" />
+          <path d="M12 4 A8 8 0 1 1 4 12" />
+          <polyline points="7.5 8.5 4 12 7.5 15.5" />
         </svg>
       </button>
     </footer>
@@ -266,8 +266,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
+    width: 52px;
+    height: 52px;
     padding: 0;
     border: 0;
     border-radius: 50%;
@@ -290,8 +290,8 @@
     cursor: default;
   }
   .iconbtn svg {
-    width: 22px;
-    height: 22px;
+    width: 30px;
+    height: 30px;
     fill: none;
     stroke: currentColor;
     stroke-width: 2;
