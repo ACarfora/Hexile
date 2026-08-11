@@ -8,8 +8,12 @@ const sw = self as unknown as ServiceWorkerGlobalScope;
 const CACHE = `hexile-cache-${version}`;
 const ASSETS = [...build, ...files];
 
+// Manually add worker files since they're not in the auto-generated manifest
+const WORKERS = build.filter((f) => f.includes('/workers/'));
+const ALL_ASSETS = [...ASSETS, ...WORKERS];
+
 sw.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(ASSETS)));
+  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(ALL_ASSETS)));
   sw.skipWaiting();
 });
 
@@ -28,7 +32,7 @@ sw.addEventListener('fetch', (event) => {
 
   const url = new URL(req.url);
   const isFont = url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com';
-  const isBuildAsset = ASSETS.includes(url.pathname);
+  const isBuildAsset = ALL_ASSETS.includes(url.pathname);
 
   if (isBuildAsset) {
     event.respondWith(caches.match(req).then((r) => r ?? fetch(req)));

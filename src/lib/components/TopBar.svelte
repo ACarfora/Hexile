@@ -3,6 +3,7 @@
   import { game } from '$lib/stores/game.svelte';
   import { timer, formatTime } from '$lib/stores/timer.svelte';
   import { theme } from '$lib/stores/theme.svelte';
+  import { records } from '$lib/stores/records.svelte';
   import Modal from '$lib/components/Modal.svelte';
 
   type Props = {
@@ -12,6 +13,10 @@
   let { onnewgame, onrestart }: Props = $props();
 
   const difficulty = $derived(game.state?.puzzle.difficulty ?? '');
+  const bestTime = $derived.by(() => {
+    const d = game.state?.puzzle.difficulty;
+    return d ? (records.best[d] ?? null) : null;
+  });
   let helpOpen = $state(false);
   let confirmNewGameOpen = $state(false);
   let confirmRestartOpen = $state(false);
@@ -107,7 +112,12 @@
   onclose={() => timer.resume()}
 >
   <div class="paused-content">
-    <div class="paused-time">{formatTime(timer.elapsed)}</div>
+    <div class="paused-clock">
+      <div class="paused-time">{formatTime(timer.elapsed)}</div>
+      {#if bestTime}
+        <div class="paused-best">Best {formatTime(bestTime.timeMs)}</div>
+      {/if}
+    </div>
     <button type="button" class="btn-primary" onclick={() => timer.resume()}>Resume</button>
     <button type="button" class="btn-ghost" onclick={() => (confirmRestartOpen = true)}>
       Restart game
@@ -232,6 +242,12 @@
     align-items: center;
     gap: 24px;
   }
+  .paused-clock {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
   .paused-time {
     font-family: var(--font-heading);
     font-size: 56px;
@@ -240,6 +256,12 @@
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.02em;
     line-height: 1.05;
+  }
+  .paused-best {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--page-fg-muted);
+    font-variant-numeric: tabular-nums;
   }
   .paused-content button {
     min-width: 160px;

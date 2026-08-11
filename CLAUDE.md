@@ -1,6 +1,6 @@
 # Hexile
 Numeric logic game, alternative to sudoku.
-Hosted behind a password protected page - hexile.themantraproject.com
+Hosted on - hexile.themantraproject.com
 
 ## Stack
 **Front End**

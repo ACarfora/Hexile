@@ -5,13 +5,17 @@
   import DifficultyButtons from '$lib/components/DifficultyButtons.svelte';
   import Modal from '$lib/components/Modal.svelte';
   import { peekSavedDifficulty, clearSavedGameAndTimer, game } from '$lib/stores/game.svelte';
-  import { timer } from '$lib/stores/timer.svelte';
+  import { timer, formatTime } from '$lib/stores/timer.svelte';
+  import { records } from '$lib/stores/records.svelte';
   import type { Difficulty } from '$lib/game/types';
+
+  const DIFFICULTIES: Difficulty[] = ['easy', 'medium', 'hard'];
 
   let today = $state('');
   let isoDate = $state('');
 
   let confirmOpen = $state(false);
+  let bestsOpen = $state(false);
   let pendingDifficulty = $state<Difficulty | null>(null);
   let savedDifficulty = $state<Difficulty | null>(null);
 
@@ -71,7 +75,12 @@
 
     <DifficultyButtons onselect={selectDifficulty} />
 
-    <time class="today" datetime={isoDate}>{today}</time>
+    <div class="footer-group">
+      <time class="today" datetime={isoDate}>{today}</time>
+      <button type="button" class="bests-btn" onclick={() => (bestsOpen = true)}>
+        Personal Bests
+      </button>
+    </div>
   </div>
 </main>
 
@@ -89,6 +98,24 @@
     <button type="button" class="btn-primary" onclick={confirmDiscard}>
       Discard &amp; start
     </button>
+  {/snippet}
+</Modal>
+
+<Modal bind:open={bestsOpen} title="Personal Bests">
+  <ul class="bests-list">
+    {#each DIFFICULTIES as d (d)}
+      {@const best = records.best[d]}
+      <li class="bests-row">
+        <span class="bests-diff">{d}</span>
+        <span class="bests-time" class:empty={!best}>
+          {best ? formatTime(best.timeMs) : '—'}
+        </span>
+      </li>
+    {/each}
+  </ul>
+
+  {#snippet actions()}
+    <button type="button" class="btn-primary" onclick={() => (bestsOpen = false)}>Close</button>
   {/snippet}
 </Modal>
 
@@ -135,6 +162,13 @@
     line-height: 1;
   }
 
+  .footer-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
   .today {
     font-family: var(--font-body);
     font-weight: 700;
@@ -143,6 +177,56 @@
     text-align: center;
     min-height: 1.4em;
     animation: brand-in 600ms cubic-bezier(0.2, 0.7, 0.3, 1) 480ms backwards;
+  }
+
+  .bests-btn {
+    border: 1.5px solid rgba(17, 17, 17, 0.5);
+    border-radius: 999px;
+    background: transparent;
+    color: #111111;
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 700;
+    padding: 8px 22px;
+    cursor: pointer;
+    transition: background-color 140ms ease;
+    animation: brand-in 600ms cubic-bezier(0.2, 0.7, 0.3, 1) 560ms backwards;
+  }
+  .bests-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+  }
+  .bests-btn:focus-visible {
+    outline: 3px solid var(--color-accent-soft);
+    outline-offset: 3px;
+  }
+
+  .bests-list {
+    list-style: none;
+    margin: 8px 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .bests-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 10px 2px;
+  }
+  .bests-row + .bests-row {
+    border-top: 1px solid var(--hover-soft);
+  }
+  .bests-diff {
+    font-weight: 600;
+    text-transform: capitalize;
+  }
+  .bests-time {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .bests-time.empty {
+    color: var(--page-fg-muted);
+    font-weight: 400;
   }
 
   .modal-body-text {
@@ -166,7 +250,8 @@
 
   @media (prefers-reduced-motion: reduce) {
     .brand,
-    .today {
+    .today,
+    .bests-btn {
       animation: none;
     }
   }

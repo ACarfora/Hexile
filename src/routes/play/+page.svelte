@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onMount, untrack } from 'svelte';
   import { page } from '$app/state';
   import { goto } from '$app/navigation';
   import GeneratorWorker from '$lib/workers/generator.worker?worker';
@@ -10,6 +10,7 @@
   import Modal from '$lib/components/Modal.svelte';
   import { game } from '$lib/stores/game.svelte';
   import { timer, formatTime } from '$lib/stores/timer.svelte';
+  import { records } from '$lib/stores/records.svelte';
   import { getBoard } from '$lib/game/state';
   import { isWon } from '$lib/game/validate';
   import type { Difficulty } from '$lib/game/types';
@@ -20,8 +21,17 @@
   let loading = $state(false);
   let error = $state<string | null>(null);
   let solvedOpen = $state(false);
-  let solvedSnapshot = $state<{ time: string; difficulty: Difficulty } | null>(null);
+  let solvedSnapshot = $state<{
+    time: string;
+    difficulty: Difficulty;
+    hintsUsed: boolean;
+    newBest: boolean;
+  } | null>(null);
   let worker: Worker | null = null;
+  // Plain (non-reactive) guard so a win is recorded exactly once, even if the
+  // effect re-runs while `won` stays true. Reset whenever the board is not won
+  // (restart, new game) so the next solve records again.
+  let winRecorded = false;
 
   function difficultyFromUrl(): Difficulty {
     const d = page.url.searchParams.get('difficulty');
@@ -102,11 +112,25 @@
   // We snapshot the time + difficulty so the modal keeps showing them even
   // after the action buttons clear the underlying state.
   $effect(() => {
-    if (!won || !game.state) return;
+    if (!won || !game.state) {
+      winRecorded = false;
+      return;
+    }
     timer.stop();
+    if (winRecorded) return;
+    winRecorded = true;
+    const { puzzle } = game.state;
+    // Hinted solves never count towards the personal best.
+    const hintsUsed = Object.keys(game.state.hints).length > 0;
+    // untrack: submit reads and writes records.best; without it this effect
+    // would depend on records state and re-run on its own write.
+    const newBest =
+      !hintsUsed && untrack(() => records.submit(puzzle.difficulty, timer.elapsed));
     solvedSnapshot = {
       time: formatTime(timer.elapsed),
-      difficulty: game.state.puzzle.difficulty
+      difficulty: puzzle.difficulty,
+      hintsUsed,
+      newBest
     };
     solvedOpen = true;
   });
@@ -205,6 +229,13 @@
 <Modal bind:open={solvedOpen} title="Solved!" closeOnBackdrop={false}>
   <div class="solved-time">{solvedSnapshot?.time ?? ''}</div>
   <div class="solved-meta">{solvedSnapshot?.difficulty ?? ''} puzzle</div>
+  {#if solvedSnapshot?.newBest}
+    <div class="solved-note best">New best time!</div>
+  {:else if solvedSnapshot?.hintsUsed}
+    <div class="solved-note">
+      Hints were used, so this time doesn't count towards your personal best.
+    </div>
+  {/if}
 
   {#snippet actions()}
     <button type="button" class="btn-ghost" onclick={backToMenu}>Back to menu</button>
@@ -373,5 +404,17 @@
     font-weight: 500;
     color: var(--page-fg-muted);
     text-transform: capitalize;
+  }
+  .solved-note {
+    margin-top: 12px;
+    text-align: center;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--page-fg-muted);
+  }
+  .solved-note.best {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--color-accent);
   }
 </style>
